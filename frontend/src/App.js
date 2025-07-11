@@ -1,90 +1,163 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-
-import { useAuth } from './contexts/AuthContext';
-import { useSocket } from './contexts/SocketContext';
-
-// Pages
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SocketProvider } from './contexts/SocketContext';
+import { TaskProvider } from './contexts/TaskContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import BoardPage from './pages/BoardPage';
 import ProfilePage from './pages/ProfilePage';
-
-// Components
-import Navbar from './components/Navbar';
 import LoadingSpinner from './components/LoadingSpinner';
-import ConflictModal from './components/ConflictModal';
 
-// Styles
-import './styles/App.css';
-
-function App() {
+// Protected Route Component
+function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
-  const { isConnected } = useSocket();
 
   if (loading) {
     return (
       <div className="app-loading">
-        <LoadingSpinner size="large" />
-        <p>Loading TodoBoard...</p>
+        <LoadingSpinner size="large" text="Loading..." />
       </div>
     );
   }
 
+  return user ? children : <Navigate to="/login" replace />;
+}
+
+// Public Route Component (redirect to board if already logged in)
+function PublicRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="app-loading">
+        <LoadingSpinner size="large" text="Loading..." />
+      </div>
+    );
+  }
+
+  return user ? <Navigate to="/board" replace /> : children;
+}
+
+// App Content (inside providers)
+function AppContent() {
+  return (
+    <>
+      <Routes>
+        {/* Public Routes */}
+        <Route 
+          path="/login" 
+          element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          } 
+        />
+        <Route 
+          path="/register" 
+          element={
+            <PublicRoute>
+              <RegisterPage />
+            </PublicRoute>
+          } 
+        />
+
+        {/* Protected Routes */}
+        <Route 
+          path="/board" 
+          element={
+            <ProtectedRoute>
+              <SocketProvider>
+                <TaskProvider>
+                  <BoardPage />
+                </TaskProvider>
+              </SocketProvider>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/board" replace />} />
+        
+        {/* Catch all route */}
+        <Route path="*" element={<Navigate to="/board" replace />} />
+      </Routes>
+
+      {/* Toast notifications */}
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        gutter={8}
+        containerClassName=""
+        containerStyle={{}}
+        toastOptions={{
+          // Default options for all toasts
+          duration: 4000,
+          style: {
+            background: 'var(--background)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-light)',
+            borderRadius: 'var(--radius-lg)',
+            fontSize: '0.875rem',
+            padding: 'var(--spacing-md)',
+            boxShadow: 'var(--shadow-lg)',
+          },
+          // Success toasts
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: 'var(--success)',
+              secondary: 'white',
+            },
+            style: {
+              borderColor: 'var(--success)',
+            },
+          },
+          // Error toasts
+          error: {
+            duration: 5000,
+            iconTheme: {
+              primary: 'var(--error)',
+              secondary: 'white',
+            },
+            style: {
+              borderColor: 'var(--error)',
+            },
+          },
+          // Loading toasts
+          loading: {
+            duration: Infinity,
+            iconTheme: {
+              primary: 'var(--primary-500)',
+              secondary: 'white',
+            },
+            style: {
+              borderColor: 'var(--primary-500)',
+            },
+          },
+        }}
+      />
+    </>
+  );
+}
+
+function App() {
   return (
     <div className="app">
-      <AnimatePresence mode="wait">
-        {user ? (
-          <motion.div
-            key="authenticated"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="app-authenticated"
-          >
-            <Navbar />
-            
-            {/* Connection Status */}
-            {!isConnected && (
-              <motion.div
-                initial={{ y: -100 }}
-                animate={{ y: 0 }}
-                className="connection-banner"
-              >
-                <span>⚠️ Connection lost. Trying to reconnect...</span>
-              </motion.div>
-            )}
-
-            <main className="app-main">
-              <Routes>
-                <Route path="/" element={<BoardPage />} />
-                <Route path="/board" element={<BoardPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-
-            <ConflictModal />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="unauthenticated"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="app-unauthenticated"
-          >
-            <Routes>
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="*" element={<Navigate to="/login" replace />} />
-            </Routes>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Router>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </Router>
     </div>
   );
 }

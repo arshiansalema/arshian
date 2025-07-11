@@ -1,0 +1,134 @@
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+}
+
+.spinner {
+  position: relative;
+  display: inline-block;
+}
+
+.spinner-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--primary-500);
+  animation: spinner-fade 1.2s linear infinite;
+}
+
+.spinner-small .spinner-circle {
+  width: 8px;
+  height: 8px;
+}
+
+.spinner-medium .spinner-circle {
+  width: 12px;
+  height: 12px;
+}
+
+.spinner-large .spinner-circle {
+  width: 16px;
+  height: 16px;
+}
+
+.spinner-small {
+  width: 32px;
+  height: 32px;
+}
+
+.spinner-medium {
+  width: 48px;
+  height: 48px;
+}
+
+.spinner-large {
+  width: 64px;
+  height: 64px;
+}
+
+.spinner-circle:nth-child(1) {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 0s;
+}
+
+.spinner-circle:nth-child(2) {
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  animation-delay: 0.3s;
+}
+
+.spinner-circle:nth-child(3) {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 0.6s;
+}
+
+.spinner-circle:nth-child(4) {
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  animation-delay: 0.9s;
+}
+
+@keyframes spinner-fade {
+  0%, 39%, 100% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.spinner-text {
+  margin-top: var(--spacing-md);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Alternative pulse spinner */
+.loading-spinner.pulse .spinner {
+  background: var(--primary-500);
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loading-spinner.pulse .spinner-circle {
+  display: none;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Rotating spinner */
+.loading-spinner.rotate .spinner {
+  border: 3px solid var(--border-light);
+  border-top: 3px solid var(--primary-500);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner.rotate .spinner-circle {
+  display: none;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
