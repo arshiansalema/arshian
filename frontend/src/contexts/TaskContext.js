@@ -74,7 +74,7 @@ function taskReducer(state, action) {
       return { ...state, tasks: tasksAfterDelete };
 
     case 'MOVE_TASK':
-      const { taskId: moveTaskId, sourceStatus, destinationStatus, sourceIndex, destinationIndex } = action.payload;
+      const { sourceStatus, destinationStatus, sourceIndex, destinationIndex } = action.payload;
       const tasksAfterMove = { ...state.tasks };
       
       // Find the task

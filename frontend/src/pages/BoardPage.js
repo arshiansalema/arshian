@@ -31,7 +31,6 @@ const COLUMN_CONFIG = {
 };
 
 function BoardPage() {
-  const [selectedTask, setSelectedTask] = useState(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isActivityFeedOpen, setIsActivityFeedOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -75,7 +74,6 @@ function BoardPage() {
       return;
     }
 
-    const sourceStatus = source.droppableId;
     const destinationStatus = destination.droppableId;
     const taskId = draggableId;
 
@@ -120,7 +118,6 @@ function BoardPage() {
     try {
       await deleteTask(taskId);
       setIsTaskModalOpen(false);
-      setSelectedTask(null);
     } catch (error) {
       console.error('Failed to delete task:', error);
     }
@@ -139,14 +136,12 @@ function BoardPage() {
   };
 
   const openTaskModal = (task = null) => {
-    setSelectedTask(task);
     setEditingTask(task);
     setIsTaskModalOpen(true);
   };
 
   const closeTaskModal = () => {
     setIsTaskModalOpen(false);
-    setSelectedTask(null);
     setEditingTask(null);
   };
 
